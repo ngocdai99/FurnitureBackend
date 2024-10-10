@@ -4,6 +4,10 @@ var userModel = require("../models/user")
 const mongoose = require('mongoose');
 const upload = require("../utils/multerconfig")
 const sendMail = require("../utils/mailconfig")
+
+const JWT = require('jsonwebtoken');
+const config = require("../utils/configEnv");
+
 const fs = require('fs').promises
 
 
@@ -24,7 +28,7 @@ userRouter.post('/register', async function (request, response) {
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Register failed' })
+        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Register failed', error: error.message })
     }
 })
 
@@ -34,7 +38,12 @@ userRouter.post('/login', async function (request, response) {
         const { email, password } = request.body
         userExisted = await userModel.findOne({ email: email, password: password })
         if (userExisted) {
-            response.status(200).json({ status: true, message: "Login successfully" });
+
+            const token = JWT.sign({id: email},config.SECRETKEY,{expiresIn: '1m'});
+            const refreshToken = JWT.sign({id: email},config.SECRETKEY,{expiresIn: '1h'})
+
+
+            response.status(200).json({ status: true, message: "Login successfully", token, refreshToken });
         } else {
             response.status(200).json({ status: true, message: "Email doesn't existed or wrong password" });
         }

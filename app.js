@@ -15,8 +15,9 @@ require("./models/order")
 
 
 // connect database
-// mongoose.connect("mongodb://localhost:27017/RestApi")
-mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/RestApi")
+// https://restapirepo.onrender.com/
+// mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/RestApi")
+mongoose.connect("mongodb://localhost:27017/RestApi")
   .then(() => console.log(">>>>>>>>>> DB Connected!!!!!!"))
   .catch((err) => console.log(">>>>>>>>> DB Error: ", err));
 
@@ -31,6 +32,12 @@ const favoriteRouter = require('./routes/favorite');
 const orderRouter = require('./routes/order');
 
 var app = express();
+
+// swagger
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./utils/configSwagger');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

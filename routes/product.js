@@ -4,13 +4,51 @@ const productModel = require('../models/product')
 const categoryModel = require("../models/category")
 const optionModel = require("../models/option")
 
+const JWT = require('jsonwebtoken');
+const config = require("../utils/configEnv");
 
 // - Lấy toàn bộ danh sách sản phẩm
+/**
+ * @swagger
+ * /product/list:
+ *   get:
+ *     summary: Lấy danh sách sản phẩm
+ * 
+ *     responses:
+ *       200:
+ *         description: Mission completed
+ *       400: 
+ *         description: Mission failed
+ */
+
 productRouter.get('/list', async function (request, response) {
     try {
-        const list = await productModel.find().populate('categoryId')
+        const token = request.header("Authorization").split(' ')[1];
+        if (token) {
+            JWT.verify(token, config.SECRETKEY, async function (err, id) {
+                if (err) {
+                    response.status(403).json({ "status": 403, "err": err });
+                } else {
+                    const list = await productModel.find().populate('categoryId')
 
-        response.status(200).json({ status: true, message: "Mission completed", data: list });
+                    response.status(200).json({ status: true, message: "Mission completed", data: list });
+                }
+            });
+        } else {
+            response.status(401).json({ "status": 401 });
+        }
+
+
+
+
+    } catch (error) {
+        response.status(400).json({ status: false, message: 'Mission failed' })
+    }
+})
+
+productRouter.get('/list2', async function (request, response) {
+    try {
+        response.status(200).json({ status: true, message: "Mission completed", data: "hehe" });
     } catch (error) {
         response.status(400).json({ status: false, message: 'Mission failed' })
     }
@@ -37,6 +75,24 @@ productRouter.get('/list/category/:categoryName', async function (request, respo
     }
 });
 
+
+/**
+ * @swagger
+ * /product/list/quantity:
+ *   get:
+ *     summary: Get all products with quantity less than "limit"
+ *     parameters:
+ *      - in: query
+ *        name: limit
+ *        description: Get all products with quantity less than "limit"
+ * 
+ *     responses:
+ *       200:
+ *         description: Get all products completed
+ *       400: 
+ *         description: Get all products failed
+ */
+
 //- Lấy danh sách sản phẩm có số lượng dưới 100
 productRouter.get('/list/quantity', async function (request, response) {
     try {
@@ -58,6 +114,7 @@ productRouter.get('/list/limit', async function (request, response) {
         response.status(400).json({ status: false, message: 'Mission failed' })
     }
 })
+
 
 // - Lấy danh sách sản phẩm có tên chứa chữ "xxx"
 productRouter.get('/list/:name', async function (request, response) {
@@ -89,9 +146,9 @@ productRouter.post('/add', async function (request, response) {
 
         await optionModel.create(defaultOption)
 
-        response.status(200).json({ status: true, message: "Mission completed",  product: newProduct, option: defaultOption });
+        response.status(200).json({ status: true, message: "Mission completed", product: newProduct, option: defaultOption });
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed',  error: error.message })
+        response.status(400).json({ status: false, message: 'Mission failed', error: error.message })
     }
 })
 
