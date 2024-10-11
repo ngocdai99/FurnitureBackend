@@ -16,8 +16,8 @@ require("./models/order")
 
 // connect database
 // https://restapirepo.onrender.com/
-// mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/RestApi")
-mongoose.connect("mongodb://localhost:27017/RestApi")
+mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/RestApi")
+// mongoose.connect("mongodb://localhost:27017/RestApi")
   .then(() => console.log(">>>>>>>>>> DB Connected!!!!!!"))
   .catch((err) => console.log(">>>>>>>>> DB Error: ", err));
 
