@@ -46,15 +46,6 @@ productRouter.get('/list', async function (request, response) {
     }
 })
 
-productRouter.get('/list2', async function (request, response) {
-    try {
-        response.status(200).json({ status: true, message: "Mission completed", data: "hehe" });
-    } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed' })
-    }
-})
-
-
 // - Lấy toàn bộ danh sách sản phẩm thuộc loại "xxx"
 productRouter.get('/list/category/:categoryName', async function (request, response) {
     try {
@@ -104,16 +95,38 @@ productRouter.get('/list/quantity', async function (request, response) {
     }
 })
 
-// - Lấy danh sách sản phẩm có giá trên 5000 và số lượng dưới 50
+/**
+ * @swagger
+ * /product/list/limit:
+ *   get: 
+ *     summary: Lấy danh sách sản phẩm có giá trên một mức nhất định và số lượng dưới một mức nhất định
+ *     parameters:
+ *       - in: query
+ *         name: price
+ *         description: Giá tối thiểu của sản phẩm
+ *         required: true
+ *         type: number
+ *       - in: query
+ *         name: quantity
+ *         description: Số lượng tối đa của sản phẩm
+ *         required: true
+ *         type: number
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách sản phẩm thành công
+ *       400: 
+ *         description: Lấy danh sách sản phẩm thất bại
+ */
 productRouter.get('/list/limit', async function (request, response) {
     try {
-        const { price, quantity } = request.body
+        const { price, quantity } = request.query
         let list = await productModel.find({ price: { $gt: price }, quantity: { $lt: quantity } })
         response.status(200).json({ status: true, message: "Mission completed", data: list });
     } catch (error) {
         response.status(400).json({ status: false, message: 'Mission failed' })
     }
 })
+
 
 
 // - Lấy danh sách sản phẩm có tên chứa chữ "xxx"
@@ -127,8 +140,57 @@ productRouter.get('/list/:name', async function (request, response) {
     }
 })
 
-
-// - Thêm mới một sản phẩm mới
+/**
+ * @swagger
+ * /product/add:
+ *   post:
+ *     summary: Thêm mới một sản phẩm
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         description: Thông tin sản phẩm cần thêm
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: Tên sản phẩm
+ *               required: true
+ *             description:
+ *               type: string
+ *               description: Mô tả sản phẩm
+ *               required: true
+ *             price:
+ *               type: number
+ *               description: Giá sản phẩm
+ *               required: true
+ *             image:
+ *               type: string
+ *               description: URL hình ảnh sản phẩm
+ *               required: true
+ *             rating:
+ *               type: number
+ *               description: Đánh giá sản phẩm
+ *               required: false
+ *             voting:
+ *               type: number
+ *               description: Số lượng bình chọn
+ *               required: false
+ *             quantity:
+ *               type: number
+ *               description: Số lượng sản phẩm
+ *               required: true
+ *             categoryId:
+ *               type: string
+ *               description: ID danh mục sản phẩm
+ *               required: true
+ *     responses:
+ *       200:
+ *         description: Thêm sản phẩm thành công
+ *       400: 
+ *         description: Thêm sản phẩm thất bại
+ */
 productRouter.post('/add', async function (request, response) {
     try {
 
@@ -152,7 +214,62 @@ productRouter.post('/add', async function (request, response) {
     }
 })
 
-// - Thay đổi thông tin sản phẩm theo id,
+/**
+ * @swagger
+ * /product/update:
+ *   put:
+ *     summary: Thay đổi thông tin sản phẩm theo ID
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         description: Thông tin sản phẩm cần cập nhật
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *               description: ID của sản phẩm cần cập nhật
+ *               required: true
+ *               default: 6706bca29b23d9ba05569982
+ *             name:
+ *               type: string
+ *               description: Tên sản phẩm
+ *               required: false
+ *               default: Mercury
+ *             description:
+ *               type: string
+ *               description: Mô tả sản phẩm
+ *               required: false
+ *               default: Sao Thủy hay Thủy Tinh là hành tinh nhỏ nhất và gần Mặt Trời nhất trong tám hành tinh thuộc hệ Mặt Trời, với chu kỳ quỹ đạo bằng khoảng 88 ngày Trái Đất. Nhìn từ Trái Đất, hành tinh hiện lên với chu kỳ giao hội trên quỹ đạo bằng xấp xỉ 116 ngày, và nhanh hơn hẳn những hành tinh khác
+ *             image:
+ *               type: string
+ *               description: URL hình ảnh sản phẩm
+ *               required: false
+ *               default: mercury_image
+ *             quantity:
+ *               type: number
+ *               description: Số lượng sản phẩm
+ *               required: false
+ *               default: 5
+ *             price:
+ *               type: number
+ *               description: Giá sản phẩm
+ *               required: false
+ *               default: 10000
+ *             categoryId:
+ *               type: string
+ *               description: ID danh mục sản phẩm
+ *               required: false
+ *               default: 6706bc989b23d9ba05569980
+ *     responses:
+ *       200:
+ *         description: Cập nhật sản phẩm thành công
+ *       400: 
+ *         description: Cập nhật sản phẩm thất bại
+ *       404:
+ *         description: Không tìm thấy sản phẩm với ID đã cho
+ */
 productRouter.put('/update', async function (request, response) {
     try {
         const { _id, name, description, image, quantity, price, categoryId } = request.body
@@ -169,26 +286,13 @@ productRouter.put('/update', async function (request, response) {
         if (item != null) {
             response.status(200).json({ status: true, message: "Mission completed", item });
         } else {
-            response.status(200).json({ status: false, message: "Not found Id" });
+            response.status(400).json({ status: false, message: "Not found Id" });
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed' })
+        response.status(404).json({ status: false, message: 'Mission failed' })
     }
 })
-
-
-// - Xóa một sản phẩm ra khỏi danh sách
-
-// productRouter.delete("/delete", async function (req, res) {
-//     try {
-//         var { _id } = req.query
-//         await productModel.findByIdAndDelete(_id);
-//         res.json({ status: true, message: "Xóa sản phẩm thành công" });
-//     } catch (err) {
-//         res.json({ status: false, message: "Xóa sản phẩm thất bại", err: err });
-//     }
-// });
 
 // - Lấy danh sách các product có price từ min đến max 
 
