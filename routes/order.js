@@ -3,24 +3,81 @@ const orderRouter = express.Router();
 const orderModel = require("../models/order")
 const orderDetailModel = require("../models/order_detail");
 const mongoose = require('mongoose');
-
+const JWT = require('jsonwebtoken');
+const util = require('util');
+const config = require("../utils/configEnv");
 
 
 // add trên cluster
+orderRouter.post('/add', async function (request, response) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const token = request.header("Authorization")?.split(' ')[1];
+
+        if (!token) {
+            return response.status(401).json({ status: false, message: "401, Unauthorized" });
+        }
+
+
+        await util.promisify(JWT.verify)(token, config.SECRETKEY);
+
+
+        const { userId, items } = request.body;
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return response.status(400).json({ status: false, message: 'Items must be a non-empty array.' });
+        }
+
+        const totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+        // Sử dụng mảng khi truyền vào `create`
+        const order = await orderModel.create([{ userId, totalAmount }], { session });
+
+        const orderDetails = items.map((item) => ({
+            orderId: order[0]._id,
+            optionId: item.optionId,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price
+        }));
+
+        await orderDetailModel.insertMany(orderDetails, { session });
+
+        // Commit transaction khi tất cả đều thành công
+        await session.commitTransaction();
+
+        // Trả về phản hồi
+        response.status(200).json({
+            status: true,
+            message: "Order created successfully",
+            order: order[0],  // Đảm bảo trả về đối tượng đơn hàng đầu tiên
+            orderDetails
+        });
+
+    } catch (error) {
+        // Rollback nếu có lỗi
+        await session.abortTransaction();
+        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Order creation failed', error: error.message });
+    } finally {
+        // Chỉ endSession sau khi toàn bộ xử lý đã hoàn tất
+        session.endSession();
+    }
+});
+
+// add ở localhost
 // orderRouter.post('/add', async function (request, response) {
-//     const session = await mongoose.startSession()
-//     session.startTransaction();
 //     try {
-//         const { userId, items } = request.body
+//         const { userId, items } = request.body;
 
-//         if (!Array.isArray(items) || items.length === 0) {
-//             return response.status(400).json({ status: false, message: 'Items must be a non-empty array.' });
-//         }
-
+//         // Tính toán tổng số tiền
 //         const totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-//         const order = await orderModel.create({ userId, totalAmount }, { session });
+//         // Tạo đơn hàng
+//         const order = await orderModel.create({ userId, totalAmount });
 
+//         // Tạo chi tiết đơn hàng
 //         const orderDetails = items.map((item) => {
 //             return {
 //                 orderId: order._id,
@@ -28,103 +85,91 @@ const mongoose = require('mongoose');
 //                 productId: item.productId,
 //                 quantity: item.quantity,
 //                 price: item.price
-//             }
-//         })
+//             };
+//         });
 
-//         await orderDetailModel.insertMany(orderDetails, {session})
-//         await session.commitTransaction();
+//         // Chèn các chi tiết đơn hàng
+//         await orderDetailModel.insertMany(orderDetails);
+
 //         response.status(200).json({
 //             status: true,
 //             message: "Order created successfully",
 //             order,
 //             orderDetails
-        
 //         });
 
 //     } catch (error) {
-//         await session.abortTransaction();
-//         response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Order creation failed', error: error.message  })
-//     }finally{
-//         session.endSession()
+//         response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Order creation failed', error: error.message });
 //     }
-// })
-
-// add ở localhost
-orderRouter.post('/add', async function (request, response) {
-    try {
-        const { userId, items } = request.body;
-
-        // Tính toán tổng số tiền
-        const totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-        // Tạo đơn hàng
-        const order = await orderModel.create({ userId, totalAmount });
-
-        // Tạo chi tiết đơn hàng
-        const orderDetails = items.map((item) => {
-            return {
-                orderId: order._id,
-                optionId: item.optionId,
-                productId: item.productId,
-                quantity: item.quantity,
-                price: item.price
-            };
-        });
-
-        // Chèn các chi tiết đơn hàng
-        await orderDetailModel.insertMany(orderDetails);
-
-        response.status(200).json({
-            status: true,
-            message: "Order created successfully",
-            order,
-            orderDetails
-        });
-
-    } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Order creation failed', error: error.message });
-    }
-});
+// });
 
 
 
 // lấy thông tin của một order thông qua orderId
 orderRouter.get('/details', async (request, response) => {
+
     try {
-        const { orderId } = request.query;
-        const order = await orderModel.findById(orderId)
-        if(order){
-            const details = await orderDetailModel.find({ orderId })
-            response.status(200).json({ status: true, order, details });
+        const token = request.header("Authorization").split(' ')[1]
+        if (token) {
+            JWT.verify(token, config.SECRETKEY, async function (error) {
+                if (error) {
+                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
+                } else {
+                    const { orderId } = request.query;
+                    const order = await orderModel.findById(orderId)
+                    if (order) {
+                        const details = await orderDetailModel.find({ orderId })
+                        response.status(200).json({ status: true, order, details });
+                    }
+
+                }
+            })
+
+        } else {
+            response.status(401).json({ status: false, message: "401, Unauthorized" });
         }
-       
-       
+
     } catch (error) {
-        response.status(400).json({ status: false, message: "Failed to fetch order details", error: error.message });
+        response.status(400).json({ status: false, message: "Failed to fetch order details", error: error.message })
     }
 });
 
 
 // lấy toàn bộ orders của một user thông qua userId
 orderRouter.get('/list-orders-by-userid', async function (request, response) {
-    try {
-        const { userId } = request.query
-        const orders = await orderModel.find({ userId: userId });
 
-        const allOrders = await Promise.all(
-            orders.map(async (order) => {
-                const details = await orderDetailModel.find({ orderId: order._id })
-                return {
-                    order,
-                    details
-                };
+    try {
+        const token = request.header("Authorization").split(' ')[1]
+        if (token) {
+            JWT.verify(token, config.SECRETKEY, async function (error) {
+                if (error) {
+                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
+                } else {
+                    const { userId } = request.query
+                    const orders = await orderModel.find({ userId: userId });
+
+                    const allOrders = await Promise.all(
+                        orders.map(async (order) => {
+                            const details = await orderDetailModel.find({ orderId: order._id })
+                            return {
+                                order,
+                                details
+                            };
+                        })
+                    );
+                    response.status(200).json({ status: true, message: "Get orders by userId completed", allOrders });
+
+                }
             })
-        );
-        response.status(200).json({ status: true, message: "Get orders by userId completed", allOrders });
+
+        } else {
+            response.status(401).json({ status: false, message: "401, Unauthorized" });
+        }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Get orders by userId failed' })
+        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Get orders by userId failed', error: error.message })
     }
+
 })
 
 
