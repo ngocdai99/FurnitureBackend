@@ -5,6 +5,39 @@ const mongoose = require('mongoose');
 const JWT = require('jsonwebtoken');
 const config = require("../utils/configEnv");
 
+
+/**
+ * @swagger
+ * /size/add:
+ *   post: 
+ *     summary: Create new size
+ *     tags: [Size]
+ *     security: 
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sizeName:
+ *                 type: string
+ *                 description: new size name
+ *                 example: M
+ *     responses:
+ *       200:
+ *         description: Create size successfully
+ *       403: 
+ *         description: HTTP 403 Forbidden,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ *       401:
+ *         description: 401, Unauthorized
+ *       400: 
+ *         description: Http Exception 400, Bad request, Create size failed
+ *       409: 
+ *         description: Http Exception 409, Size Name existed
+ */
+
 sizeRouter.post('/add', async function (request, response) {
 
     try {
@@ -22,7 +55,7 @@ sizeRouter.post('/add', async function (request, response) {
                         await sizeModel.create(newSize);
                         response.status(200).json({ status: true, message: "Create size completed", size: newSize });
                     } else {
-                        response.status(200).json({ status: false, message: "Size Name existed" });
+                        response.status(409).json({ status: false, message: "Size Name existed" });
                     }
                 }
             })
@@ -36,7 +69,24 @@ sizeRouter.post('/add', async function (request, response) {
     }
 })
 
-
+/**
+ * @swagger
+ * /size/list:
+ *   get:
+ *     summary: Get all sizes
+ *     tags: [Size]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Get sizes list completed
+ *       400:
+ *         description: Http Exception 400, Bad request, Get sizes list failed
+ *       401:
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: HTTP 403 Forbidden, verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ */
 sizeRouter.get('/list', async function (request, response) {
 
     try {
@@ -65,7 +115,45 @@ sizeRouter.get('/list', async function (request, response) {
     }
 })
 
-sizeRouter.post('/update', async function (request, response) {
+
+/**
+ * @swagger
+ * /size/update:
+ *   put:
+ *     summary: Update size name with ID
+ *     tags: [Size]
+ *     security: 
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *                 description: ID của sản phẩm cần cập nhật
+ *                 example: 670a3d3a0a60865036210f84
+ *               sizeName:
+ *                 type: string
+ *                 description: Tên sản phẩm
+ *                 example: L
+ *     responses:
+ *       200:
+ *         description: Update sizeName successfully
+ *       400: 
+ *         description: Dữ liệu yêu cầu không hợp lệ, Update failed
+ *       401: 
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: HTTP 403 Forbidden, verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ *       404:
+ *         description: Not found size Id
+ *       409:
+ *         description: 409, Size name you want to update is existed
+ */
+sizeRouter.put('/update', async function (request, response) {
 
     try {
         const token = request.header("Authorization").split(' ')[1]
@@ -77,7 +165,7 @@ sizeRouter.post('/update', async function (request, response) {
                     const { _id, sizeName } = request.body
                     const sizeNameExisted = await sizeModel.findOne({ sizeName: sizeName })
                     if (sizeNameExisted) {
-                        response.status(200).json({ status: false, message: "Size name you want to update is existed" });
+                        response.status(409).json({ status: false, message: "Size name you want to update is existed" });
                     } else {
                         const updateData = {};
 

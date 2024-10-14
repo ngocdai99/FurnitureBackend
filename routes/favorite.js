@@ -5,7 +5,37 @@ var favoriteModel = require("../models/favorite")
 const JWT = require('jsonwebtoken');
 const config = require("../utils/configEnv");
 
-
+/**
+ * @swagger
+ * /favorite/add:
+ *   post: 
+ *     summary: Create new favorite
+ *     tags: [Favorite]
+ *     security: 
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sizeName:
+ *                 type: string
+ *                 description: new size name
+ *                 example: M
+ *     responses:
+ *       200:
+ *         description: Create favorite successfully
+ *       403: 
+ *         description: HTTP 403 Forbidden,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ *       401:
+ *         description: 401, Unauthorized
+ *       400: 
+ *         description: Http Exception 400, Bad request, Create favorite failed
+ *       409: 
+ *         description: Http Exception 409, This product is existed in this user's favorites
+ */
 favoriteRouter.post('/add', async function (request, response) {
     try {
         const token = request.header("Authorization").split(' ')[1]
@@ -22,7 +52,7 @@ favoriteRouter.post('/add', async function (request, response) {
                         await favoriteModel.create(newFavorite);
                         response.status(200).json({ status: true, message: "Create new favorite completed", favorite: newFavorite });
                     } else {
-                        response.status(200).json({ status: true, message: "This product is existed in this user's favorites" });
+                        response.status(409).json({ status: true, message: "This product is existed in this user's favorites" });
                     }
                 }
             })
@@ -36,6 +66,27 @@ favoriteRouter.post('/add', async function (request, response) {
     }
 })
 
+
+/**
+ * @swagger
+ * /favorite/list-favorites-by-userid:
+ *   get: 
+ *     summary: Get all favorites of an user with userId
+ *     tags: [Favorite]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         description: Id of the user you want to get all favorites
+ *         required: true
+ *         type: number
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách sản phẩm thành công
+ *       400: 
+ *         description: Lấy danh sách sản phẩm thất bại
+ */
 // lấy toàn bộ favorite của một user thông qua userId
 favoriteRouter.get('/list-favorites-by-userid', async function (request, response) {
     try {
@@ -68,7 +119,8 @@ favoriteRouter.get('/list-favorites-by-userid', async function (request, respons
  * @swagger
  * /favorite/delete:
  *   delete:
- *     summary: Xóa favorite 
+ *     summary: Delete favorite 
+ *     tags: [Favorite]
  *     security:
  *       - bearerAuth: []
  *     parameters:

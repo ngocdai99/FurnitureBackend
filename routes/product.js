@@ -24,8 +24,9 @@ const config = require("../utils/configEnv");
  * /product/list:
  *   get:
  *     summary: Lấy danh sách sản phẩm
+ *     tags: [Product]
  *     security:
- *       - bearerAuth: []  # Sử dụng JWT xác thực
+ *       - bearerAuth: []  
  *     responses:
  *       200:
  *         description: Mission completed
@@ -60,6 +61,7 @@ productRouter.get('/list', async function (request, response) {
  * /product/list/quantity:
  *   get:
  *     summary: Get all products with quantity less than "limit"
+ *     tags: [Product]
  *     security: 
  *       - bearerAuth: []
  *     parameters:
@@ -107,6 +109,7 @@ productRouter.get('/list/quantity', async function (request, response) {
  * /product/list/category/{categoryName}:
  *   get:
  *     summary: Get all products of category "xxx"
+ *     tags: [Product]
  *     security: 
  *       - bearerAuth: []
  *     parameters:
@@ -162,6 +165,7 @@ productRouter.get('/list/category/:categoryName', async function (request, respo
  * /product/list/limit:
  *   get: 
  *     summary: Lấy danh sách sản phẩm có giá trên xxx và số lượng dưới xxx
+ *     tags: [Product]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -221,6 +225,7 @@ productRouter.get('/list/:name', async function (request, response) {
  * /product/add:
  *   post:
  *     summary: Thêm sản phẩm 
+ *     tags: [Product]
  *     security: 
  *       - bearerAuth: []
  *     requestBody:
@@ -230,7 +235,6 @@ productRouter.get('/list/:name', async function (request, response) {
  *           schema:
  *             type: object
  *             properties:
- *    
  *               name:
  *                 type: string
  *                 description: Tên sản phẩm
@@ -257,11 +261,13 @@ productRouter.get('/list/:name', async function (request, response) {
  *                 example: 670353609c7a6640a611fc13
  *     responses:
  *       200:
- *         description: Thêm sản phẩm thành công
+ *         description: Thêm product thành công
+ *       403: 
+ *         description: HTTP 403 Forbidden,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ *       401:
+ *         description: 401, Unauthorized
  *       400: 
- *         description: Dữ liệu yêu cầu không hợp lệ
- *       404:
- *         description: Không tìm thấy sản phẩm với ID đã cho
+ *         description: Http Exception 400, Bad request, Create product failed
  */
 
 productRouter.post('/add', async function (request, response) {
@@ -271,7 +277,7 @@ productRouter.post('/add', async function (request, response) {
         if (token) {
             JWT.verify(token, config.SECRETKEY, async function (error) {
                 if (error) {
-                    response.status(403).json({ status: 403, message: error });
+                    response.status(403).json({ status: 403, message: 'HTTP 403 Forbidden,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó' });
                 } else {
                     const { name, description, price, image, rating, voting, quantity, categoryId } = request.body
                     const addItem = { name, description, price, image, rating, voting, quantity, categoryId };
@@ -287,7 +293,7 @@ productRouter.post('/add', async function (request, response) {
 
                     await optionModel.create(defaultOption)
 
-                    response.status(200).json({ status: true, message: "Mission completed", product: newProduct, option: defaultOption });
+                    response.status(200).json({ status: true, message: "Create product completed", product: newProduct, option: defaultOption });
                 }
             })
 
@@ -296,7 +302,7 @@ productRouter.post('/add', async function (request, response) {
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed', error: error.message })
+        response.status(400).json({ status: false, message: 'Create product failed', error: error.message })
     }
 })
 
@@ -305,6 +311,7 @@ productRouter.post('/add', async function (request, response) {
  * /product/update:
  *   put:
  *     summary: Thay đổi thông tin sản phẩm theo ID
+ *     tags: [Product]
  *     security: 
  *       - bearerAuth: []
  *     requestBody:
@@ -346,7 +353,11 @@ productRouter.post('/add', async function (request, response) {
  *       200:
  *         description: Cập nhật sản phẩm thành công
  *       400: 
- *         description: Dữ liệu yêu cầu không hợp lệ
+ *         description: Dữ liệu yêu cầu không hợp lệ, Update failed
+ *       401: 
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: HTTP 403 Forbidden, verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
  *       404:
  *         description: Không tìm thấy sản phẩm với ID đã cho
  */
@@ -372,8 +383,63 @@ productRouter.put('/update', async function (request, response) {
                     if (item != null) {
                         response.status(200).json({ status: true, message: "Update completed", item });
                     } else {
-                        response.status(200).json({ status: false, message: "Not found Id" });
+                        response.status(404).json({ status: false, message: "404, Not found Id" });
                     }
+                }
+            })
+
+        } else {
+            response.status(401).json({ status: false, message: "401, Unauthorized" });
+        }
+
+    } catch (error) {
+        response.status(400).json({ status: false, message: 'Update failed' })
+    }
+})
+
+
+/**
+ * @swagger
+ * /product/list/range-price/{min}/{max}:
+ *   get:
+ *     summary: Get all products with price from min to max
+ *     tags: [Product]
+ *     security: 
+ *       - bearerAuth: []
+ *     parameters:
+ *      - in: path
+ *        name: min
+ *        required: true
+ *        description: Min price
+ *      - in: path
+ *        name: max
+ *        required: true
+ *        description: Max price
+ *     responses:
+ *       200:
+ *         description: Mission completed
+ *       400:
+ *         description: Http Exception 400, Bad request, Mission failed
+ *       401:
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: HTTP 403 Forbidden, verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ */
+// - Lấy danh sách các product có price từ min đến max 
+
+productRouter.get('/list/range-price/:min/:max', async function (request, response) {
+
+    try {
+        const token = request.header("Authorization").split(' ')[1];
+        if (token) {
+            JWT.verify(token, config.SECRETKEY, async function (error, id) {
+                if (error) {
+                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
+                } else {
+                    const { min, max } = request.params
+                    let list = await productModel.find({ price: { $gte: min, $lte: max } });
+
+                    response.status(200).json({ status: true, message: "Mission completed", data: list });
                 }
             })
 
@@ -382,99 +448,186 @@ productRouter.put('/update', async function (request, response) {
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Update failed' })
+        response.status(400).json({ status: false, message: 'Mission failed' });
     }
-})
 
-// - Lấy danh sách các product có price từ min đến max 
-
-productRouter.get('/list/range-price/:min/:max', async function (request, response) {
-
-    try {
-        const { min, max } = request.params
-        let list = await productModel.find({ price: { $gte: min, $lte: max } });
-
-        response.status(200).json({ status: true, message: "Mission completed", data: list });
-    } catch (error) {
-        console.error("Error:", error);
-        response.status(400).json({ status: false, message: 'Mission failed', error: error.message });
-    }
 });
 
-// - Lấy ra danh sách các product thuộc loại xxx và có số lượng lớn hơn yyy 
+
+/**
+ * @swagger
+ * /product/list/category-quantity/{categoryName}/{quantity}:
+ *   get:
+ *     summary: Get all products of category xxx with price higher than yyy
+ *     tags: [Product]
+ *     security: 
+ *       - bearerAuth: []
+ *     parameters:
+ *      - in: path
+ *        name: categoryName
+ *        required: true
+ *        description: categoryName
+ *      - in: path
+ *        name: quantity
+ *        required: true
+ *        description: minimmum quantity of products
+ *     responses:
+ *       200:
+ *         description: Mission completed
+ *       400:
+ *         description: Http Exception 400, Bad request, Mission failed
+ *       401:
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: HTTP 403 Forbidden, verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ *       404:
+ *         description: 404, Not found categoryName
+ */
 productRouter.get('/list/category-quantity/:categoryName/:quantity', async function (request, response) {
 
     try {
-        const { categoryName, quantity } = request.params
+        const token = request.header("Authorization").split(' ')[1];
+        if (token) {
+            JWT.verify(token, config.SECRETKEY, async function (error, id) {
+                if (error) {
+                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
+                } else {
+                    const { categoryName, quantity } = request.params
 
-        let category = await categoryModel.findOne({ name: categoryName })
-        if (category) {
-            console.log('categoryId = ', category._id)
-            let list = await productModel.find({ categoryId: category._id, quantity: { $gt: quantity } });
-            response.status(200).json({ status: true, message: "Mission completed", data: list });
+                    let category = await categoryModel.findOne({ name: categoryName })
+                    if (category) {
+                        console.log('categoryId = ', category._id)
+                        let list = await productModel.find({ categoryId: category._id, quantity: { $gt: quantity } });
+                        response.status(200).json({ status: true, message: "Mission completed", data: list });
+                    } else {
+                        response.status(404).json({ status: false, message: "404, Not found categoryName" });
+                    }
+
+                }
+            })
+
         } else {
-            response.status(200).json({ status: false, message: "Not found categoryName" });
+            response.status(401).json({ status: false, message: "Unauthorized" });
         }
 
-
     } catch (error) {
-        console.error("Error:", error);
-        response.status(400).json({ status: false, message: 'Mission failed', error: error.message });
+        response.status(400).json({ status: false, message: 'Mission failed' });
     }
+
 });
 
 
 
 
 
+/**
+ * @swagger
+ * /product/list-sort-ascending:
+ *   get:
+ *     summary: Get all products sort ascending
+ *     tags: [Product]
+ *     security:
+ *       - bearerAuth: []  
+ *     responses:
+ *       200:
+ *         description: Mission completed
+ *       400:
+ *         description: Mission failed
+ *       401:
+ *         description: Unauthorized
+ */
 
-// - Sắp xếp danh sách sản phẩm theo giá từ thấp đến cao
 productRouter.get('/list-sort-ascending', async function (request, response) {
-    try {
-        const list = await productModel.find().sort({ price: 'ascending' })
 
-        response.status(200).json({ status: true, message: "Mission completed", data: list });
+    try {
+        const token = request.header("Authorization").split(' ')[1];
+        if (token) {
+            JWT.verify(token, config.SECRETKEY, async function (error, id) {
+                if (error) {
+                    response.status(403).json({ status: 403, message: error });
+                } else {
+                    const list = await productModel.find().sort({ price: 'ascending' })
+
+                    response.status(200).json({ status: true, message: "Mission completed", data: list });
+                }
+            });
+        } else {
+            response.status(401).json({ status: false, message: "Not authorized" });
+        }
     } catch (error) {
         response.status(400).json({ status: false, message: 'Mission failed' })
     }
 })
 
 
-
-// - Tìm sản phẩm có giá cao nhất thuộc loại xxx
-
-
+/**
+ * @swagger
+ * /product/list/category-highest-price/{categoryName}:
+ *   get:
+ *     summary: Get all products of category xxx with highest price
+ *     tags: [Product]
+ *     security: 
+ *       - bearerAuth: []
+ *     parameters:
+ *      - in: path
+ *        name: categoryName
+ *        required: true
+ *        description: categoryName
+ *     responses:
+ *       200:
+ *         description: 200, Mission completed
+ *       204:
+ *         description: 204, No products found in this category
+ *       400:
+ *         description: Http Exception 400, Bad request, Mission failed
+ *       401:
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: HTTP 403 Forbidden, verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ *       404:
+ *         description: 404, Not found categoryName
+ */
 productRouter.get('/list/category-highest-price/:categoryName/', async function (request, response) {
 
     try {
-        const { categoryName } = request.params
+        const token = request.header("Authorization").split(' ')[1];
+        if (token) {
+            JWT.verify(token, config.SECRETKEY, async function (error, id) {
+                if (error) {
+                    response.status(403).json({ status: 403, message: error });
+                } else {
+                    const { categoryName } = request.params
 
-        // 1. Check xem loại được nhập vào có tồn tại hay không
+                    // 1. Check xem loại được nhập vào có tồn tại hay không
 
-        const category = await categoryModel.findOne({ name: categoryName })
-        if (category) {
-            const products = await productModel.find({ categoryId: category._id })
-            console.log('products = ', products)
+                    const category = await categoryModel.findOne({ name: categoryName })
+                    if (category) {
+                        const products = await productModel.find({ categoryId: category._id })
+                        console.log('products = ', products)
 
-            if (products.length === 0) {
-                response.status(200).json({ status: false, message: "No products found in this category" });
-                return
-            }
-            // 2. Tìm giá cao nhất trong loại đó
-            const maxPrice = Math.max(...products.map((item) => item.price))
+                        if (products.length === 0) {
+                            response.status(204).json({ status: false, message: "204, No products found in this category", products });
+                            return
+                        }
+                        // 2. Tìm giá cao nhất trong loại đó
+                        const maxPrice = Math.max(...products.map((item) => item.price))
 
-            // 3. Lọc tất cả sản phẩm có giá cao nhất đó, return 1 mảng
-            const result = products.filter((item) => item.price == maxPrice)
+                        // 3. Lọc tất cả sản phẩm có giá cao nhất đó, return 1 mảng
+                        const result = products.filter((item) => item.price == maxPrice)
 
-            response.status(200).json({ status: true, message: "Mission completed", data: result });
+                        response.status(200).json({ status: true, message: "200, Mission completed", data: result });
+                    } else {
+                        response.status(404).json({ status: false, message: "404, Category not found" });
+                    }
+                }
+            });
         } else {
-            response.status(200).json({ status: false, message: "Category not found" });
+            response.status(401).json({ status: false, message: "401, Not authorized" });
         }
-
-
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed', error: error.message });
+        response.status(400).json({ status: false, message: '400, Mission failed' })
     }
+
 });
 
 

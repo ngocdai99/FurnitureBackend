@@ -7,6 +7,57 @@ const JWT = require('jsonwebtoken');
 const util = require('util');
 const config = require("../utils/configEnv");
 
+/**
+ * @swagger
+ * /order/add:
+ *   post:
+ *     summary: Add a new order
+ *     security: 
+ *       - bearerAuth: []
+ *     description: Creates a new order with order details
+ *     tags: [Order]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "670398b0d1e8715c0ffe1789"
+ *                 description: ID of the user placing the order
+ *               items:
+ *                 type: array
+ *                 description: List of items in the order
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     optionId:
+ *                       type: string
+ *                       example: "670a3d3b0a60865036210f86"
+ *                       description: ID of the selected product option
+ *                     productId:
+ *                       type: string
+ *                       example: "670a3d3a0a60865036210f84"
+ *                       description: ID of the product
+ *                     quantity:
+ *                       type: integer
+ *                       example: 2
+ *                       description: Number of units of the product
+ *                     price:
+ *                       type: number
+ *                       example: 10000
+ *                       description: Price per unit of the product
+ *     responses:
+ *       200:
+ *         description: Order created successfully
+ *       400:
+ *         description: Bad request, Order creation failed
+ *       401:
+ *         description: Unauthorized
+ */
+
 
 // add trên cluster
 orderRouter.post('/add', async function (request, response) {
@@ -32,7 +83,7 @@ orderRouter.post('/add', async function (request, response) {
 
         const totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-        // Sử dụng mảng khi truyền vào `create`
+   
         const order = await orderModel.create([{ userId, totalAmount }], { session });
 
         const orderDetails = items.map((item) => ({
@@ -45,23 +96,20 @@ orderRouter.post('/add', async function (request, response) {
 
         await orderDetailModel.insertMany(orderDetails, { session });
 
-        // Commit transaction khi tất cả đều thành công
         await session.commitTransaction();
 
-        // Trả về phản hồi
+      
         response.status(200).json({
             status: true,
             message: "Order created successfully",
-            order: order[0],  // Đảm bảo trả về đối tượng đơn hàng đầu tiên
+            order: order[0], 
             orderDetails
         });
 
     } catch (error) {
-        // Rollback nếu có lỗi
         await session.abortTransaction();
         response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Order creation failed', error: error.message });
     } finally {
-        // Chỉ endSession sau khi toàn bộ xử lý đã hoàn tất
         session.endSession();
     }
 });
@@ -104,8 +152,30 @@ orderRouter.post('/add', async function (request, response) {
 // });
 
 
-
-// lấy thông tin của một order thông qua orderId
+/**
+ * @swagger
+ * /order/details:
+ *   get: 
+ *     summary: Get order details with orderId
+ *     tags: [Order]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: orderId
+ *         description: OrderId you want to get details
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: 200, Fetch order details successfully
+ *       400: 
+ *         description: 400, Failed to fetch order details
+ *       401:
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: HTTP 403 Forbidden,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ */
 orderRouter.get('/details', async (request, response) => {
 
     try {
@@ -119,7 +189,7 @@ orderRouter.get('/details', async (request, response) => {
                     const order = await orderModel.findById(orderId)
                     if (order) {
                         const details = await orderDetailModel.find({ orderId })
-                        response.status(200).json({ status: true, order, details });
+                        response.status(200).json({ status: true, message: '200, Fetch order details successfully', order, details });
                     }
 
                 }
@@ -130,11 +200,34 @@ orderRouter.get('/details', async (request, response) => {
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: "Failed to fetch order details", error: error.message })
+        response.status(400).json({ status: false, message: "400, Failed to fetch order details", error: error.message })
     }
 });
 
-
+/**
+ * @swagger
+ * /order/list-orders-by-userid:
+ *   get: 
+ *     summary: Get all favorites of an user with userId
+ *     tags: [Order]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         description: userId you want to get his order history
+ *         required: true
+ *         type: number
+ *     responses:
+ *       200:
+ *         description: 200, Get orders by userId completed
+ *       400: 
+ *         description: 400, Bad request, Get orders by userId failed
+ *       401:
+ *         description: 401, Unauthorized
+ *       403: 
+ *         description: 403,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
+ */
 // lấy toàn bộ orders của một user thông qua userId
 orderRouter.get('/list-orders-by-userid', async function (request, response) {
 
