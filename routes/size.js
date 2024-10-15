@@ -99,9 +99,9 @@ sizeRouter.get('/list', async function (request, response) {
                     const list = await sizeModel.find()
                     console.log('sizes list', list)
                     if (list.length == 0) {
-                        response.status(200).json({ status: true, message: "Get sizes list completed, sizes length = 0", sizes: list });
+                        response.status(204).json({ status: true, message: "204, Get sizes list completed, sizes length = 0", sizes: list });
                     } else {
-                        response.status(200).json({ status: true, message: "Get sizes list completed", sizes: list });
+                        response.status(200).json({ status: true, message: "200, Get sizes list completed", sizes: list });
                     }
                 }
             })
