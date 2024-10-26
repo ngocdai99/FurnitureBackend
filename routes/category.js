@@ -37,19 +37,8 @@ categoryRouter.get('/list/detail', async function (request, response) {
  */
 categoryRouter.get('/list', async function (request, response) {
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    let list = await categoryModel.find()
-                    response.status(200).json({ status: true, message: "Mission completed", data: list });
-                }
-            })
-        } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
-        }
+        let list = await categoryModel.find()
+        response.status(200).json({ status: true, message: "Mission completed", data: list });
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Mission failed' })
@@ -94,26 +83,16 @@ categoryRouter.get('/list', async function (request, response) {
  */
 categoryRouter.post("/add", async function (request, response) {
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { name, image } = request.body;
-                    const existedCategory = await categoryModel.findOne({ name: name })
-                    if (!existedCategory) {
-                        const addItem = { name, image };
-                        await categoryModel.create(addItem);
-                        response.status(200).json({ status: true, message: "Category created completed", addItem });
-                    } else {
-                        console.log(existedCategory)
-                        response.status(409).json({ status: false, message: "Category name is existed" });
-                    }
-                }
-            })
+
+        const { name, image } = request.body;
+        const existedCategory = await categoryModel.findOne({ name: name })
+        if (!existedCategory) {
+            const category = { name, image };
+            await categoryModel.create(category);
+            response.status(200).json({ status: true, message: "Category created completed", category });
         } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
+            console.log(existedCategory)
+            response.status(409).json({ status: false, message: "Category name is existed" });
         }
 
     } catch (error) {
