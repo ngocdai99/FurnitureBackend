@@ -273,33 +273,22 @@ productRouter.get('/list/:name', async function (request, response) {
 productRouter.post('/add', async function (request, response) {
     try {
 
-        const token = request.header('Authorization').split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: 403, message: 'HTTP 403 Forbidden,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó' });
-                } else {
-                    const { name, description, price, image, rating, voting, quantity, categoryId } = request.body
-                    const addItem = { name, description, price, image, rating, voting, quantity, categoryId };
-                    const newProduct = await productModel.create(addItem);
 
-                    // Tạo option mặc định cho sản phẩm mới
-                    const defaultOption = {
-                        sizeId: '6706498d54c243334697c383',
-                        productId: newProduct._id,
-                        price: newProduct.price,
-                        optionName: `${name} Default Option`
-                    }
+        const { name, description, price, image,  quantity, categoryId } = request.body
+        const addItem = { name, description, price, image, quantity, categoryId };
+        const newProduct = await productModel.create(addItem);
 
-                    await optionModel.create(defaultOption)
+        // Tạo option mặc định cho sản phẩm mới
+        // const defaultOption = {
+        //     sizeId: '6706498d54c243334697c383',
+        //     productId: newProduct._id,
+        //     price: newProduct.price,
+        //     optionName: `${name} Default Option`
+        // }
 
-                    response.status(200).json({ status: true, message: "Create product completed", product: newProduct, option: defaultOption });
-                }
-            })
+        // await optionModel.create(defaultOption)
 
-        } else {
-            response.status(401).json({ status: false, message: "Unauthorized" });
-        }
+        response.status(200).json({ status: true, message: "Create product completed", product: newProduct});
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Create product failed', error: error.message })

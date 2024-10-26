@@ -14,11 +14,11 @@ const product = new Schema({
         default: 'Nothing'
     },
     description: {type: String},
-    price: {type: Number},
+    price: {type: Number, default: 50},
     image: {type: String},
-    rating: {type: Number},
-    voting: {type: Number},
-    quantity: {type: Number},
+    rating: {type: Number, default: 5},
+    voting: {type: Number, default: 0},
+    quantity: {type: Number, default: 10},
     categoryId: {type: ObjectId, ref: 'category'}
   
 })
