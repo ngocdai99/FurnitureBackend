@@ -78,30 +78,46 @@ userRouter.post('/register', async function (request, response) {
  *               email:
  *                 type: string
  *                 description: email
- *                 example: M
+ *                 example: ngocdai97@gmail.com
  *               password:
  *                 type: string
  *                 description: password
- *                 example: M
+ *                 example: 123
  *     responses:
  *       200:
  *         description: Register successfully
  *       400: 
- *         description: Http Exception 400, Bad request, Create favorite failed
+ *         description: Http Exception 400, Bad request, Login failed
  *       401: 
  *         description: Http Exception 409, Email doesn't existed or wrong password
  */
+// userRouter.post('/login', async function (request, response) {
+//     try {
+//         const { email, password } = request.body
+//         userExisted = await userModel.findOne({ email: email, password: password })
+//         if (userExisted) {
+
+//             const token = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' });
+//             const refreshToken = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' })
+
+
+//             response.status(200).json({ status: true, message: "Login successfully", token, refreshToken });
+//         } else {
+//             response.status(401).json({ status: true, message: "Email doesn't existed or wrong password" });
+//         }
+
+//     } catch (error) {
+//         response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Login failed' })
+//     }
+// })
+
 userRouter.post('/login', async function (request, response) {
     try {
         const { email, password } = request.body
         userExisted = await userModel.findOne({ email: email, password: password })
         if (userExisted) {
 
-            const token = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' });
-            const refreshToken = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' })
-
-
-            response.status(200).json({ status: true, message: "Login successfully", token, refreshToken });
+            response.status(200).json({ status: true, message: "Login successfully", userDetail: userExisted });
         } else {
             response.status(401).json({ status: true, message: "Email doesn't existed or wrong password" });
         }

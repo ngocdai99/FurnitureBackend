@@ -4,6 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser')
 var logger = require('morgan');
+const cors = require('cors');
+
+
 
 // config mongoose
 const mongoose = require('mongoose')
@@ -15,11 +18,13 @@ require("./models/order")
 
 
 
+
+
 // connect database
 // https://restapirepo.onrender.com/
 
-// mongoose.connect("mongodb://localhost:27017/RestApi")
-mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/RestApi")
+// mongoose.connect("mongodb://localhost:27017/Furniture")
+mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/Furniture")
   .then(() => console.log(">>>>>>>>>> DB Connected!!!!!!"))
   .catch((err) => console.log(">>>>>>>>> DB Error: ", err));
 
@@ -32,6 +37,8 @@ const sizeRouter = require('./routes/size');
 const optionRouter = require('./routes/option');
 const favoriteRouter = require('./routes/favorite');
 const orderRouter = require('./routes/order');
+
+
 
 var app = express();
 
@@ -52,6 +59,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(cors());
+
 app.use('/user', userRouter)
 app.use('/category', categoryRouter)
 app.use('/product', productRouter)
@@ -59,6 +68,8 @@ app.use('/size', sizeRouter)
 app.use('/option', optionRouter)
 app.use('/favorite', favoriteRouter)
 app.use('/order', orderRouter)
+
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
