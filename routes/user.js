@@ -46,9 +46,9 @@ userRouter.post('/register', async function (request, response) {
         const { name, email, password } = request.body
         const userExisted = await userModel.findOne({ email: email })
         if (!userExisted) {
-            const newUser = { name, image: '', email, password, age: '', address: '', };
-            console.log('newUser', newUser)
-            await userModel.create(newUser);
+            const user = { name, image: '', email, password, age: '', address: '', };
+            console.log('newUser', user)
+            const newUser = await userModel.create(user);
             response.status(200).json({ status: true, message: "Register completed", userDetail: newUser });
         } else {
             response.status(409).json({ status: false, message: "Email existed" });
