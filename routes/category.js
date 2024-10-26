@@ -38,7 +38,7 @@ categoryRouter.get('/list/detail', async function (request, response) {
 categoryRouter.get('/list', async function (request, response) {
     try {
         let list = await categoryModel.find()
-        response.status(200).json({ status: true, message: "Mission completed", data: list });
+        response.status(200).json({ status: true, message: "Mission completed", categories: list });
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Mission failed' })
