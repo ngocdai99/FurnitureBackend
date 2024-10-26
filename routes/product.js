@@ -125,32 +125,28 @@ productRouter.get('/list/quantity', async function (request, response) {
  *       401:
  *         description: Unauthorized
  */
-productRouter.get('/list/category/:categoryName', async function (request, response) {
+productRouter.get('/list/category/:categoryId', async function (request, response) {
     try {
-        const token = request.header("Authorization").split(' ')[1];
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error, id) {
-                if (error) {
-                    response.status(403).json({ status: 403, message: error });
-                } else {
-                    const { categoryName } = request.params;
 
-                    // Tìm danh mục theo tên
-                    const category = await categoryModel.findOne({ name: categoryName });
-                    if (!category) {
-                        return response.status(200).json({ status: false, message: "Category not found" });
-                    }
+        const { categoryId } = request.params;
+        // Lấy danh sách sản phẩm thuộc loại đó
+        const list = await productModel.find({ categoryId });
 
-                    // Lấy danh sách sản phẩm thuộc loại đó
-                    const list = await productModel.find({ categoryId: category._id }, 'name').populate('categoryId', 'name');
+        response.status(200).json({ status: true, message: "Mission completed", products: list });
 
-                    response.status(200).json({ status: true, message: "Mission completed", data: list });
-                }
-            })
+    } catch (error) {
+        response.status(400).json({ status: false, message: 'Mission failed' });
+    }
+});
 
-        } else {
-            response.status(401).json({ status: false, message: "Unauthorized" });
-        }
+productRouter.get('/detail/:productId', async function (request, response) {
+    try {
+
+        const { productId } = request.params;
+
+        const productDetail = await productModel.findOne({ _id: productId });
+
+        response.status(200).json({ status: true, message: "Mission completed", productDetail});
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Mission failed' });
@@ -274,7 +270,7 @@ productRouter.post('/add', async function (request, response) {
     try {
 
 
-        const { name, description, price, image,  quantity, categoryId } = request.body
+        const { name, description, price, image, quantity, categoryId } = request.body
         const addItem = { name, description, price, image, quantity, categoryId };
         const newProduct = await productModel.create(addItem);
 
@@ -288,7 +284,7 @@ productRouter.post('/add', async function (request, response) {
 
         // await optionModel.create(defaultOption)
 
-        response.status(200).json({ status: true, message: "Create product completed", product: newProduct});
+        response.status(200).json({ status: true, message: "Create product completed", product: newProduct });
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Create product failed', error: error.message })
