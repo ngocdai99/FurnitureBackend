@@ -135,7 +135,7 @@ productRouter.get('/list/category/:categoryId', async function (request, respons
         response.status(200).json({ status: true, message: "Mission completed", products: list });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed' });
+        response.status(400).json({ status: false, message: 'Mission failed', products: [] });
     }
 });
 
