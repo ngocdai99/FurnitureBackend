@@ -41,7 +41,7 @@ categoryRouter.get('/list', async function (request, response) {
         response.status(200).json({ status: true, message: "Mission completed", categories: list });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed' })
+        response.status(400).json({ status: false, message: 'Mission failed', categories: [] })
     }
 })
 
