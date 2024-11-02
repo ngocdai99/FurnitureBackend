@@ -114,9 +114,9 @@ favoriteRouter.get('/list-favorites-by-userid', async function (request, respons
  *       400: 
  *         description: Http Exception 400, Bad request, Delete failed
  */
-favoriteRouter.delete('/delete', async function (request, response) {
+favoriteRouter.delete('/delete/:_id', async function (request, response) {
     try {
-        const { _id } = request.query;
+        const { _id } = request.params;
         if (!_id) {
             return response.status(400).json({ status: false, message: 'Missing required field: _id' });
         }
