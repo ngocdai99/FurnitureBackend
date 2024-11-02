@@ -38,27 +38,16 @@ const config = require("../utils/configEnv");
  */
 favoriteRouter.post('/add', async function (request, response) {
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { userId, productId } = request.body
-                    const existedFavorite = await favoriteModel.findOne({ userId, productId })
-                    if (!existedFavorite) {
-                        const newFavorite = { userId, productId };
-                        console.log('newFavorite', newFavorite)
-                        await favoriteModel.create(newFavorite);
-                        response.status(200).json({ status: true, message: "Create new favorite completed", favorite: newFavorite });
-                    } else {
-                        response.status(409).json({ status: true, message: "This product is existed in this user's favorites" });
-                    }
-                }
-            })
 
+        const { userId, productId } = request.body
+        const existedFavorite = await favoriteModel.findOne({ userId, productId })
+        if (!existedFavorite) {
+            const newFavorite = { userId, productId };
+            console.log('newFavorite', newFavorite)
+            await favoriteModel.create(newFavorite);
+            response.status(200).json({ status: true, message: "Create new favorite completed", favorite: newFavorite });
         } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
+            response.status(409).json({ status: true, message: "This product is existed in this user's favorites" });
         }
 
     } catch (error) {
@@ -100,8 +89,8 @@ favoriteRouter.get('/list-favorites-by-userid', async function (request, respons
                     if (userId) {
                         const list = await favoriteModel.find({ userId: userId });
                         response.status(200).json({ status: true, message: "Get favorites by userId completed", favorites: list });
-                    }else{
-                        response.status(200).json({ status: false, message: "Missing userId in query params"});
+                    } else {
+                        response.status(200).json({ status: false, message: "Missing userId in query params" });
                     }
                 }
             })
