@@ -47,7 +47,7 @@ favoriteRouter.post('/add', async function (request, response) {
             const newFavorite = await favoriteModel.create(favorite);
             response.status(200).json({ status: true, message: "Create new favorite completed", favorite: newFavorite });
         } else {
-            response.status(409).json({ status: true, message: "This product is existed in this user's favorites" });
+            response.status(409).json({ status: false, message: "This product is existed in this user's favorites" });
         }
 
     } catch (error) {
