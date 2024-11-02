@@ -81,8 +81,14 @@ favoriteRouter.get('/list-favorites-by-userid', async function (request, respons
     try {
         const { userId } = request.query
         if (userId) {
-            const list = await favoriteModel.find({ userId: userId });
-            response.status(200).json({ status: true, message: "Get favorites by userId completed", favorites: list });
+            const list = await favoriteModel.find({ userId: userId }).populate('productId');
+            const favorites = list.map(item => ({
+                ...item.toObject(),
+                product: item.productId,
+                // Xóa trường productId nếu không cần thiết
+                productId: undefined,
+            }));
+            response.status(200).json({ status: true, message: "Get favorites by userId completed", favorites });
         } else {
             response.status(200).json({ status: false, message: "Missing userId in query params" });
         }
