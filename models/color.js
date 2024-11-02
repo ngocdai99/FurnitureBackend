@@ -2,12 +2,12 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 const ObjectId = Schema.ObjectId
 
-const size = new Schema({
+const color = new Schema({
     id: {type: ObjectId},
-    sizeName: {
+    colorName: {
         type: String,
         required: true,
-        // unique: true,
+        unique: true,
         // trim: true,
         // maxLength: 30,
         // minLength: 6,
@@ -15,4 +15,4 @@ const size = new Schema({
     },
 })
 
-module.exports = mongoose.models.size || mongoose.model("size", size)
+module.exports = mongoose.models.color || mongoose.model("color", color)

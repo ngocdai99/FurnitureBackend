@@ -13,7 +13,7 @@ const mongoose = require('mongoose')
 require("./models/category")
 require("./models/product")
 require("./models/user")
-require("./models/size")
+require("./models/color")
 require("./models/order")
 
 
@@ -33,7 +33,7 @@ mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mo
 const userRouter = require('./routes/user');
 const productRouter = require('./routes/product');
 const categoryRouter = require('./routes/category');
-const sizeRouter = require('./routes/size');
+const colorRouter = require('./routes/color');
 const optionRouter = require('./routes/option');
 const favoriteRouter = require('./routes/favorite');
 const orderRouter = require('./routes/order');
@@ -64,7 +64,7 @@ app.use(cors());
 app.use('/user', userRouter)
 app.use('/category', categoryRouter)
 app.use('/product', productRouter)
-app.use('/size', sizeRouter)
+app.use('/color', colorRouter)
 app.use('/option', optionRouter)
 app.use('/favorite', favoriteRouter)
 app.use('/order', orderRouter)
