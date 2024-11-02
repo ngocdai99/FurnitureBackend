@@ -45,9 +45,8 @@ colorRouter.post('/add', async function (request, response) {
         const { colorName } = request.body
         const colorExisted = await colorModel.findOne({ colorName })
         if (!colorExisted) {
-            const newColor = { colorName };
-            console.log('newColor', newColor)
-            await colorModel.create(newColor);
+          
+            const newColor = await colorModel.create(newColor);
             response.status(200).json({ status: true, message: "Create color completed", color: newColor });
         } else {
             response.status(409).json({ status: false, message: "Color Name existed" });
