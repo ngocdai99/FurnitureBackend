@@ -42,9 +42,9 @@ favoriteRouter.post('/add', async function (request, response) {
         const { userId, productId } = request.body
         const existedFavorite = await favoriteModel.findOne({ userId, productId })
         if (!existedFavorite) {
-            const newFavorite = { userId, productId };
-            console.log('newFavorite', newFavorite)
-            await favoriteModel.create(newFavorite);
+            const favorite = { userId, productId };
+            console.log('newFavorite', favorite)
+            const newFavorite = await favoriteModel.create(favorite);
             response.status(200).json({ status: true, message: "Create new favorite completed", favorite: newFavorite });
         } else {
             response.status(409).json({ status: true, message: "This product is existed in this user's favorites" });
@@ -79,24 +79,12 @@ favoriteRouter.post('/add', async function (request, response) {
 // lấy toàn bộ favorite của một user thông qua userId
 favoriteRouter.get('/list-favorites-by-userid', async function (request, response) {
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { userId } = request.query
-                    if (userId) {
-                        const list = await favoriteModel.find({ userId: userId });
-                        response.status(200).json({ status: true, message: "Get favorites by userId completed", favorites: list });
-                    } else {
-                        response.status(200).json({ status: false, message: "Missing userId in query params" });
-                    }
-                }
-            })
-
+        const { userId } = request.query
+        if (userId) {
+            const list = await favoriteModel.find({ userId: userId });
+            response.status(200).json({ status: true, message: "Get favorites by userId completed", favorites: list });
         } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
+            response.status(200).json({ status: false, message: "Missing userId in query params" });
         }
 
     } catch (error) {
@@ -128,27 +116,20 @@ favoriteRouter.get('/list-favorites-by-userid', async function (request, respons
  */
 favoriteRouter.delete('/delete', async function (request, response) {
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error, id) {
-                if (error) {
-                    response.status(403).json({ status: 403, message: error });
-                } else {
-                    const { _id } = request.query;
-                    if (!_id) {
-                        return response.status(400).json({ status: false, message: 'Missing required field: _id' });
-                    }
-
-                    await favoriteModel.findByIdAndDelete(_id);
-                    response.status(200).json({ status: true, message: "Delete completed" });
-                }
-            })
-        } else {
-            response.status(401).json({ status: false, message: "Unauthorized" });
+        const { _id } = request.query;
+        if (!_id) {
+            return response.status(400).json({ status: false, message: 'Missing required field: _id' });
         }
 
+        const result = await favoriteModel.findByIdAndDelete(_id);
+        if (!result) {
+            return response.status(404).json({ status: false, message: "Item not found" });
+        }
+        
+        response.status(200).json({ status: true, message: "Delete completed" });
+
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Delete failed' });
+        response.status(500).json({ status: false, message: 'Http Exception 500: Internal server error, Delete failed' });
     }
 });
 
