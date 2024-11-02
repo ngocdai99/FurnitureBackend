@@ -43,7 +43,7 @@ colorRouter.post('/add', async function (request, response) {
     try {
 
         const { colorName } = request.body
-        const colorExisted = await sizeModel.findOne({ colorName })
+        const colorExisted = await colorModel.findOne({ colorName })
         if (!colorExisted) {
             const newColor = { colorName };
             console.log('newColor', newColor)
