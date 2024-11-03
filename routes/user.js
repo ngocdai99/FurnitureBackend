@@ -157,25 +157,14 @@ userRouter.post('/login', async function (request, response) {
  *       409:
  *         description: 409, UserId doesn't existed
  */
-userRouter.get('/user-detail/:_id', async function (request, response) {
+userRouter.get('/user-detail/:userId', async function (request, response) {
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { _id } = request.params
-                    userExisted = await userModel.findById(_id)
-                    if (userExisted) {
-                        response.status(200).json({ status: true, message: "Get detail successfully", detail: userExisted });
-                    } else {
-                        response.status(409).json({ status: true, message: "UserId doesn't existed" });
-                    }
-                }
-            })
+        const { userId } = request.params
+        userExisted = await userModel.findById(userId)
+        if (userExisted) {
+            response.status(200).json({ status: true, message: "Get detail successfully", detail: userExisted });
         } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
+            response.status(409).json({ status: true, message: "UserId doesn't existed" });
         }
 
     } catch (error) {
