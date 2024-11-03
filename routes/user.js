@@ -173,7 +173,7 @@ userRouter.get('/user-detail/:userId', async function (request, response) {
 })
 
 
-userRouter.put('/change-password', async function (request, response) {
+userRouter.patch('/change-password', async function (request, response) {
     try {
 
         const { userId, currentPassword, newPassword } = request.body;
