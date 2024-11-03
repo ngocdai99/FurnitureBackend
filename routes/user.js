@@ -162,7 +162,7 @@ userRouter.get('/user-detail/:userId', async function (request, response) {
         const { userId } = request.params
         userExisted = await userModel.findById(userId)
         if (userExisted) {
-            response.status(200).json({ status: true, message: "Get detail successfully", detail: userExisted });
+            response.status(200).json({ status: true, message: "Get detail successfully", userDetail: userExisted });
         } else {
             response.status(409).json({ status: true, message: "UserId doesn't existed" });
         }
