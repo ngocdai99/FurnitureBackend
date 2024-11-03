@@ -173,6 +173,35 @@ userRouter.get('/user-detail/:userId', async function (request, response) {
 })
 
 
+userRouter.put('/change-password', async function (request, response) {
+    try {
+
+        const { userId, currentPassword, newPassword } = request.body;
+
+
+        if (!currentPassword || !newPassword) {
+            return response.status(400).json({ status: false, message: "Both current and new passwords are required" });
+        }
+
+        const user = await userModel.findById(userId)
+
+        if (!user) {
+            return response.status(404).json({ status: false, message: "User not found" });
+        }
+
+        if (user.password !== currentPassword) {
+            return response.status(403).json({ status: false, message: "Current password is incorrect" });
+        }
+
+        user.password = newPassword;
+        await user.save();
+        response.status(200).json({ status: true, message: "Password changed successfully" });
+    } catch (error) {
+        response.status(400).json({ status: false, message: 'Update password failed', error: error.message })
+    }
+})
+
+
 
 /**
  * @swagger
