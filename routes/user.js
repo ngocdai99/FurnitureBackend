@@ -119,7 +119,7 @@ userRouter.post('/login', async function (request, response) {
 
             response.status(200).json({ status: true, message: "Login successfully", userDetail: userExisted });
         } else {
-            response.status(401).json({ status: true, message: "Email doesn't existed or wrong password" });
+            response.status(401).json({ status: false, message: "Email doesn't existed or wrong password" });
         }
 
     } catch (error) {
