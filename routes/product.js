@@ -158,14 +158,15 @@ productRouter.post('/detail/:productId', async function (request, response) {
 
 
         let isFavorite = false
-        if (!userId) {
+        if (userId) {
             const favorite = favoriteModel.findOne({ userId, productId })
 
             isFavorite = !!favorite
 
-            return response.status(200).json({ status: true, message: "Get product details successfully", productDetail, isFavorite });
-
         }
+
+        return response.status(200).json({ status: true, message: "Get product details successfully", productDetail, isFavorite });
+
 
 
     } catch (error) {
