@@ -140,12 +140,11 @@ productRouter.get('/list/category/:categoryId', async function (request, respons
     }
 });
 
-productRouter.post('/detail/:productId', async function (request, response) {
+productRouter.get('/detail/:productId/:userId', async function (request, response) {
     try {
 
-        const { productId } = request.params
-        const { userId } = request.body
-
+        const { productId, userId } = request.params
+      
         if (!productId) {
             return response.status(400).json({ status: false, message: "Missing productId in query params" });
         }
