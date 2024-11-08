@@ -144,17 +144,29 @@ productRouter.get('/detail/:productId', async function (request, response) {
     try {
 
         const { productId } = request.params
+        const { userId } = request.body
 
         if (!productId) {
             return response.status(400).json({ status: false, message: "Missing productId in query params" });
         }
 
-        const productDetail = await productModel.findById( productId );
+        const productDetail = await productModel.findById(productId);
         if (!productDetail) {
             return response.status(404).json({ status: false, message: "Product not found" });
         }
 
-        response.status(200).json({ status: true, message: "Get product details successfully", productDetail });
+
+
+        let isFavorite = false
+        if (!userId) {
+            const favorite = favoriteModel.findOne({ userId, productId })
+
+            isFavorite = !!favorite
+
+            return response.status(200).json({ status: true, message: "Get product details successfully", productDetail, isFavorite });
+
+        }
+
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Http Exception 400, Bad request, get product details failed' });
