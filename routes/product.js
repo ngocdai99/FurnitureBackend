@@ -158,7 +158,7 @@ productRouter.get('/detail/:productId/:userId', async function (request, respons
 
         let isFavorite = false
         if (userId) {
-            const favorite = favoriteModel.findOne({ userId, productId })
+            const favorite = await favoriteModel.findOne({ userId, productId })
 
             isFavorite = !!favorite
 
