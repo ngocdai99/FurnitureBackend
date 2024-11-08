@@ -139,6 +139,28 @@ favoriteRouter.delete('/delete/:favoriteId', async function (request, response) 
     }
 });
 
+favoriteRouter.post('/check-favorite', async function (request, response) {
+    try {
+        const { productId, userId } = request.body;
+        if (!productId) {
+            return response.status(400).json({ status: false, message: 'Missing required field: productId' });
+        }
+        if (!userId) {
+            return response.status(400).json({ status: false, message: 'Missing required field: userId' });
+        }
+
+        const result = await favoriteModel.findOne({productId, userId});
+        if (!result) {
+            return response.status(200).json({ status: false, message: "This product is not in the user's favorites" });
+        }
+        
+        response.status(200).json({ status: true, message: "This product is in the user's favorites" });
+
+    } catch (error) {
+        response.status(500).json({ status: false, message: 'Server error, failed to check favorite' });
+    }
+});
+
 
 
 
