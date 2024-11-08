@@ -140,7 +140,7 @@ productRouter.get('/list/category/:categoryId', async function (request, respons
     }
 });
 
-productRouter.get('/detail/:productId', async function (request, response) {
+productRouter.post('/detail/:productId', async function (request, response) {
     try {
 
         const { productId } = request.params
