@@ -50,26 +50,14 @@ const config = require("../utils/configEnv");
 optionRouter.post('/add', async function (request, response) {
 
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { sizeId, productId, price, optionName } = request.body
-                    const newOption = { sizeId, productId, price, optionName };
-                    console.log('newOption', newOption)
-                    await optionModel.create(newOption);
-                    response.status(200).json({ status: true, message: "Create new option completed", option: newOption });
-                }
-            })
 
-        } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
-        }
+        const { colorId, productId, price, optionName } = request.body
+        const option = { colorId, productId, price, optionName };
+        const newOption = await optionModel.create(option);
+        response.status(200).json({ status: true, message: "Create new option completed", option: newOption });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Create option failed', message: error.message })
+        response.status(400).json({ status: false, message: `Http Exception 400: Bad request, ${error.message}`})
     }
 })
 
@@ -116,31 +104,20 @@ optionRouter.post('/add', async function (request, response) {
 optionRouter.put('/update', async function (request, response) {
 
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { _id, price, optionName } = request.body
 
-                    const updateData = {};
+        const { _id, price, optionName } = request.body
 
-                    if (price) updateData.price = price;
-                    if (optionName) updateData.optionName = optionName;
+        const updateData = {};
+
+        if (price) updateData.price = price;
+        if (optionName) updateData.optionName = optionName;
 
 
-                    const item = await optionModel.findByIdAndUpdate(_id, updateData, { new: true })
-                    if (item != null) {
-                        response.status(200).json({ status: true, message: "Update completed", item });
-                    } else {
-                        response.status(200).json({ status: false, message: "Not found optionId" });
-                    }
-                }
-            })
-
+        const item = await optionModel.findByIdAndUpdate(_id, updateData, { new: true })
+        if (item != null) {
+            response.status(200).json({ status: true, message: "Update completed", item });
         } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
+            response.status(200).json({ status: false, message: "Not found optionId" });
         }
 
     } catch (error) {
@@ -178,21 +155,11 @@ optionRouter.put('/update', async function (request, response) {
 optionRouter.get('/list-options-by-productid', async function (request, response) {
 
     try {
-        const token = request.header("Authorization").split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { productId } = request.query
-                    const list = await optionModel.find({ productId: productId });
-                    response.status(200).json({ status: true, message: "Get options by productId completed", options: list });
-                }
-            })
 
-        } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
-        }
+        const { productId } = request.query
+        const list = await optionModel.find({ productId: productId });
+        response.status(200).json({ status: true, message: "Get options by productId completed", options: list });
+
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Http Exception 400, Bad request, Get options by productId failed', message: error.message })
