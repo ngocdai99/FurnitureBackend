@@ -57,7 +57,7 @@ optionRouter.post('/add', async function (request, response) {
         response.status(200).json({ status: true, message: "Create new option completed", option: newOption });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: Bad request, ${error.message}`})
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }`})
     }
 })
 
@@ -121,7 +121,7 @@ optionRouter.put('/update', async function (request, response) {
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Update option failed', message: error.message })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }`})
     }
 })
 
@@ -162,7 +162,7 @@ optionRouter.get('/list-options-by-productid', async function (request, response
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400, Bad request, Get options by productId failed', message: error.message })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
     }
 })
 

@@ -197,7 +197,7 @@ orderRouter.get('/details', async (request, response) => {
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: "400, Failed to fetch order details", error: error.message })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
     }
 });
 
@@ -246,7 +246,7 @@ orderRouter.get('/list-orders-by-userid', async function (request, response) {
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Get orders by userId failed', error: error.message })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
     }
 
 })

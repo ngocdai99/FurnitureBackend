@@ -169,7 +169,7 @@ productRouter.get('/detail/:productId/:userId', async function (request, respons
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Http Exception 400, Bad request, get product details failed' });
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` });
     }
 });
 
@@ -307,7 +307,7 @@ productRouter.post('/add', async function (request, response) {
         response.status(200).json({ status: true, message: "Create product completed", product: newProduct });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Create product failed', error: error.message })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
     }
 })
 
@@ -398,7 +398,7 @@ productRouter.put('/update', async function (request, response) {
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Update failed' })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
     }
 })
 
@@ -453,7 +453,7 @@ productRouter.get('/list/range-price/:min/:max', async function (request, respon
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed' });
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` });
     }
 
 });
@@ -516,7 +516,7 @@ productRouter.get('/list/category-quantity/:categoryName/:quantity', async funct
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed' });
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` });
     }
 
 });
@@ -560,7 +560,7 @@ productRouter.get('/list-sort-ascending', async function (request, response) {
             response.status(401).json({ status: false, message: "Not authorized" });
         }
     } catch (error) {
-        response.status(400).json({ status: false, message: 'Mission failed' })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
     }
 })
 
@@ -630,7 +630,7 @@ productRouter.get('/list/category-highest-price/:categoryName/', async function 
             response.status(401).json({ status: false, message: "401, Not authorized" });
         }
     } catch (error) {
-        response.status(400).json({ status: false, message: '400, Mission failed' })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
     }
 
 });
