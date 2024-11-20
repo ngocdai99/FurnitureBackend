@@ -296,7 +296,7 @@ productRouter.post('/add', async function (request, response) {
 
         // Tạo option mặc định cho sản phẩm mới
         const defaultOption = {
-            colorId: '6706498d54c243334697c383',
+            colorId: '673e06e90dbabed2a67ef71f',
             productId: newProduct._id,
             image: newProduct.image,
             price: newProduct.price,
