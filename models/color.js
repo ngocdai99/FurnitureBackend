@@ -11,7 +11,7 @@ const color = new Schema({
         // trim: true,
         // maxLength: 30,
         // minLength: 6,
-        default: 'Nothing'
+        default: 'Original'
     },
 })
 
