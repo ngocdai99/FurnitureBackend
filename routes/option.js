@@ -51,13 +51,13 @@ optionRouter.post('/add', async function (request, response) {
 
     try {
 
-        const { colorId, productId, image, price, optionName } = request.body
-        const option = { colorId, productId, image, price, optionName };
+        const { colorId, productId, image, price, name } = request.body
+        const option = { colorId, productId, image, price, name };
         const newOption = await optionModel.create(option);
         response.status(200).json({ status: true, message: "Create new option completed", option: newOption });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }`})
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 })
 
@@ -85,7 +85,7 @@ optionRouter.post('/add', async function (request, response) {
  *                 type: number
  *                 description: new option price
  *                 example: 10000
- *               optionName:
+ *               name:
  *                 type: string
  *                 description: new option name
  *                 example: Mercury size L
@@ -105,12 +105,14 @@ optionRouter.put('/update', async function (request, response) {
 
     try {
 
-        const { _id, price, optionName } = request.body
+        const { _id, price, image, name } = request.body
 
         const updateData = {};
 
         if (price) updateData.price = price;
-        if (optionName) updateData.optionName = optionName;
+        if (name) updateData.name = name;
+        if (image) updateData.image = image;
+
 
 
         const item = await optionModel.findByIdAndUpdate(_id, updateData, { new: true })
@@ -121,7 +123,7 @@ optionRouter.put('/update', async function (request, response) {
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }`})
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 })
 
@@ -162,7 +164,7 @@ optionRouter.get('/list-options-by-productid', async function (request, response
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 })
 

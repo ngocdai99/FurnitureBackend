@@ -9,7 +9,7 @@ const option = new Schema({
     productId:  {type: ObjectId, ref: 'product'},
     image: {type: String},
     price: {type: Number},
-    optionName: {
+    name: {
         type: String,
         required: true,
         // unique: true,
