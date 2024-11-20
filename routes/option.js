@@ -51,8 +51,8 @@ optionRouter.post('/add', async function (request, response) {
 
     try {
 
-        const { colorId, productId, price, optionName } = request.body
-        const option = { colorId, productId, price, optionName };
+        const { colorId, productId, image, price, optionName } = request.body
+        const option = { colorId, productId, image, price, optionName };
         const newOption = await optionModel.create(option);
         response.status(200).json({ status: true, message: "Create new option completed", option: newOption });
 

@@ -298,6 +298,7 @@ productRouter.post('/add', async function (request, response) {
         const defaultOption = {
             colorId: '6706498d54c243334697c383',
             productId: newProduct._id,
+            image: newProduct.image,
             price: newProduct.price,
             optionName: `${name} Default Option`
         }
