@@ -4,7 +4,7 @@ const ObjectId = Schema.ObjectId
 
 const option = new Schema({
     id: {type: ObjectId},
-    sizeId:  {type: ObjectId, ref: 'size'},
+    colorId:  {type: ObjectId, ref: 'color'},
     productId:  {type: ObjectId, ref: 'product'},
     price: {type: Number},
     optionName: {

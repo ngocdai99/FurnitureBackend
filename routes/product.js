@@ -295,14 +295,14 @@ productRouter.post('/add', async function (request, response) {
         const newProduct = await productModel.create(addItem);
 
         // Tạo option mặc định cho sản phẩm mới
-        // const defaultOption = {
-        //     sizeId: '6706498d54c243334697c383',
-        //     productId: newProduct._id,
-        //     price: newProduct.price,
-        //     optionName: `${name} Default Option`
-        // }
+        const defaultOption = {
+            colorId: '6706498d54c243334697c383',
+            productId: newProduct._id,
+            price: newProduct.price,
+            optionName: `${name} Default Option`
+        }
 
-        // await optionModel.create(defaultOption)
+        await optionModel.create(defaultOption)
 
         response.status(200).json({ status: true, message: "Create product completed", product: newProduct });
 
