@@ -300,7 +300,7 @@ productRouter.post('/add', async function (request, response) {
             productId: newProduct._id,
             image: newProduct.image,
             price: newProduct.price,
-            name: `${name} Default Option`
+            name: `${name} Original`
         }
 
         await optionModel.create(defaultOption)
