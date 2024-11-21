@@ -154,7 +154,8 @@ productRouter.get('/detail/:productId/:userId', async function (request, respons
             return response.status(404).json({ status: false, message: "Product not found" });
         }
 
-
+        const options = await optionModel.find({ productId: productId });
+     
 
         let isFavorite = false
         if (userId) {
@@ -164,7 +165,7 @@ productRouter.get('/detail/:productId/:userId', async function (request, respons
 
         }
 
-        return response.status(200).json({ status: true, message: "Get product details successfully", productDetail, isFavorite });
+        return response.status(200).json({ status: true, message: "Get product details successfully", productDetail, options, isFavorite });
 
 
 
