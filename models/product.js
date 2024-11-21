@@ -15,7 +15,7 @@ const product = new Schema({
     },
     description: {type: String},
     price: {type: Number, default: 50},
-    image: {type: String},
+    image: {type: [String]},
     rating: {type: Number, default: 5},
     voting: {type: Number, default: 0},
     quantity: {type: Number, default: 10},

@@ -144,7 +144,7 @@ productRouter.get('/detail/:productId/:userId', async function (request, respons
     try {
 
         const { productId, userId } = request.params
-      
+
         if (!productId) {
             return response.status(400).json({ status: false, message: "Missing productId in query params" });
         }
@@ -169,7 +169,7 @@ productRouter.get('/detail/:productId/:userId', async function (request, respons
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` });
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` });
     }
 });
 
@@ -308,7 +308,7 @@ productRouter.post('/add', async function (request, response) {
         response.status(200).json({ status: true, message: "Create product completed", product: newProduct });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 })
 
@@ -369,37 +369,26 @@ productRouter.post('/add', async function (request, response) {
  */
 productRouter.put('/update', async function (request, response) {
     try {
-        const token = request.header('Authorization').split(' ')[1]
-        if (token) {
-            JWT.verify(token, config.SECRETKEY, async function (error) {
-                if (error) {
-                    response.status(403).json({ status: false, message: "HTTP 403 Forbidden, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó" });
-                } else {
-                    const { _id, name, description, image, quantity, price, categoryId } = request.body
-                    console.log('updateting', _id, name)
-                    const updateData = {};
-                    if (name) updateData.name = name;
-                    if (description) updateData.description = description;
-                    if (image) updateData.image = image;
-                    if (quantity) updateData.quantity = quantity;
-                    if (price) updateData.price = price;
-                    if (categoryId) updateData.categoryId = categoryId;
 
-                    const item = await productModel.findByIdAndUpdate(_id, updateData, { new: true })
-                    if (item != null) {
-                        response.status(200).json({ status: true, message: "Update completed", item });
-                    } else {
-                        response.status(404).json({ status: false, message: "404, Not found Id" });
-                    }
-                }
-            })
+        const { _id, name, description, image, quantity, price, categoryId } = request.body
+        console.log('updateting', _id, name)
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (description) updateData.description = description;
+        if (image) updateData.image = image;
+        if (quantity) updateData.quantity = quantity;
+        if (price) updateData.price = price;
+        if (categoryId) updateData.categoryId = categoryId;
 
+        const item = await productModel.findByIdAndUpdate(_id, updateData, { new: true })
+        if (item != null) {
+            response.status(200).json({ status: true, message: "Update completed", item });
         } else {
-            response.status(401).json({ status: false, message: "401, Unauthorized" });
+            response.status(404).json({ status: false, message: "404, Not found Id" });
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 })
 
@@ -454,7 +443,7 @@ productRouter.get('/list/range-price/:min/:max', async function (request, respon
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` });
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` });
     }
 
 });
@@ -517,7 +506,7 @@ productRouter.get('/list/category-quantity/:categoryName/:quantity', async funct
         }
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` });
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` });
     }
 
 });
@@ -561,7 +550,7 @@ productRouter.get('/list-sort-ascending', async function (request, response) {
             response.status(401).json({ status: false, message: "Not authorized" });
         }
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 })
 
@@ -631,7 +620,7 @@ productRouter.get('/list/category-highest-price/:categoryName/', async function 
             response.status(401).json({ status: false, message: "401, Not authorized" });
         }
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 
 });
