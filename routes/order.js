@@ -186,7 +186,7 @@ orderRouter.post('/add', async function (request, response) {
 orderRouter.post('/details', async (request, response) => {
     try {
         const { orderId } = request.body;
-        
+
         // Kiểm tra orderId
         if (!orderId) {
             return response.status(400).json({
@@ -209,17 +209,17 @@ orderRouter.post('/details', async (request, response) => {
         const updateOrder = { ...rest, user: userId };
 
         // Lấy chi tiết đơn hàng và cập nhật thông tin sản phẩm
-        const details = await orderDetailModel.find({ orderId }).populate('productId');
+        const details = await orderDetailModel.find({ orderId }).populate('productId', 'name').populate('optionId')
         const updateDetails = details.map(detail => {
-            const { productId, ...restDetail } = detail.toObject();
-            return { ...restDetail, product: productId }; 
+            const { productId, optionId, ...restDetail } = detail.toObject();
+            return { ...restDetail, productName: productId.name, option: optionId };
         });
 
         // Trả về kết quả
         response.status(200).json({
             status: true,
             message: '200, Fetch order details successfully',
-            order: updateOrder,
+            generalInformation: updateOrder,
             details: updateDetails
         });
 
@@ -276,10 +276,10 @@ orderRouter.post('/list-orders', async function (request, response) {
 
         const allOrders = await Promise.all(
             updateOrders.map(async (order) => {
-                const details = await orderDetailModel.find({ orderId: order._id }).populate('productId')
+                const details = await orderDetailModel.find({ orderId: order._id }).populate('productId', 'name').populate('optionId')
                 const updateDetails = details.map((detail) => {
-                    const { productId, ...restDetail } = detail.toObject();
-                    return { ...restDetail, product: productId }; 
+                    const { productId, optionId, ...restDetail } = detail.toObject();
+                    return { ...restDetail, productName: productId.name, option: optionId };
                 })
                 return {
                     generalInformation: order,
