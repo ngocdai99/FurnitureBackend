@@ -282,12 +282,12 @@ orderRouter.post('/list-orders', async function (request, response) {
                     return { ...restDetail, product: productId }; 
                 })
                 return {
-                    order,
+                    generalInformation: order,
                     details: updateDetails
                 };
             })
         );
-        response.status(200).json({ status: true, message: "Get orders by userId and status completed", generalInformation: allOrders });
+        response.status(200).json({ status: true, message: "Get orders by userId and status completed", orders: allOrders });
 
 
     } catch (error) {
