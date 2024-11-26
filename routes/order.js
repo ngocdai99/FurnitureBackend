@@ -265,7 +265,7 @@ orderRouter.post('/list-orders', async function (request, response) {
     try {
 
         const { userId, status } = request.body
-        const orders = await orderModel.find({ userId: userId, status: status }).populate('userId');
+        const orders = await orderModel.find({ userId: userId, status: status }).populate('userId').sort('createdAt', 'descending');
         const updateOrders = orders.map((order) => {
             const orderObj = order.toObject();
             orderObj.user = orderObj.userId;
@@ -295,6 +295,36 @@ orderRouter.post('/list-orders', async function (request, response) {
     }
 
 })
+
+orderRouter.post('/update', async (request, response) => {
+    try {
+        const { orderId, status } = request.body;
+
+        // Kiểm tra orderId
+        if (!orderId) {
+            return response.status(400).json({
+                status: false,
+                message: 'Order ID is required.'
+            });
+        }
+        const updateData = {};
+        if (status) updateData.status = status
+
+        const item = await orderModel.findByIdAndUpdate(orderId, updateData, { new: true })
+        if (item != null) {
+            response.status(200).json({ status: true, message: "Update order ", item });
+        } else {
+            response.status(404).json({ status: false, message: "404, Not found Id" });
+        }
+      
+
+    } catch (error) {
+        response.status(400).json({
+            status: false,
+            message: `Http Exception 400: ${error.message}`
+        });
+    }
+});
 
 
 

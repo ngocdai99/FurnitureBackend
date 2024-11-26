@@ -7,7 +7,7 @@ const order = new Schema({
     id: {type: ObjectId},
     userId:  {type: ObjectId, ref: 'user'},
     totalAmount:  {type: Number},
-    createdDate: {type: Date, default: Date.now},
+    createdAt: {type: Date, default: Date.now},
     status: { type: String, default: 'Pending confirmed' },
 
 })
