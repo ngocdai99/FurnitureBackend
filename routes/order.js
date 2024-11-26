@@ -148,8 +148,7 @@ orderRouter.post('/add', async function (request, response) {
         response.status(200).json({
             status: true,
             message: "Order created successfully",
-            order: order[0],
-            orderDetails
+            orderId: order[0]._id
         });
 
     } catch (error) {
@@ -184,26 +183,58 @@ orderRouter.post('/add', async function (request, response) {
  *       403: 
  *         description: HTTP 403 Forbidden,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
  */
-orderRouter.get('/details', async (request, response) => {
-
+orderRouter.post('/details', async (request, response) => {
     try {
-
-        const { orderId } = request.query;
-        const order = await orderModel.findById(orderId)
-        if (order) {
-            const details = await orderDetailModel.find({ orderId })
-            response.status(200).json({ status: true, message: '200, Fetch order details successfully', order, details });
+        const { orderId } = request.body;
+        
+        // Kiểm tra orderId
+        if (!orderId) {
+            return response.status(400).json({
+                status: false,
+                message: 'Order ID is required.'
+            });
         }
 
+        // Tìm đơn hàng và thông tin người dùng
+        const order = await orderModel.findById(orderId).populate('userId');
+        if (!order) {
+            return response.status(404).json({
+                status: false,
+                message: 'Order not found.'
+            });
+        }
+
+        // Tạo đối tượng order mới với userId chuyển thành user
+        const { userId, ...rest } = order.toObject();
+        const updateOrder = { ...rest, user: userId };
+
+        // Lấy chi tiết đơn hàng và cập nhật thông tin sản phẩm
+        const details = await orderDetailModel.find({ orderId }).populate('productId');
+        const updateDetails = details.map(detail => {
+            const { productId, ...restDetail } = detail.toObject();
+            return { ...restDetail, product: productId }; 
+        });
+
+        // Trả về kết quả
+        response.status(200).json({
+            status: true,
+            message: '200, Fetch order details successfully',
+            order: updateOrder,
+            details: updateDetails
+        });
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
+        response.status(400).json({
+            status: false,
+            message: `Http Exception 400: ${error.message}`
+        });
     }
 });
 
+
 /**
  * @swagger
- * /order/list-orders-by-userid:
+ * /order/list-orders:
  *   get: 
  *     summary: Get all favorites of an user with userId
  *     tags: [Order]
@@ -225,28 +256,42 @@ orderRouter.get('/details', async (request, response) => {
  *       403: 
  *         description: 403,verify JWT failed, Máy chủ đã hiểu yêu cầu, nhưng sẽ không đáp ứng yêu cầu đó
  */
-// lấy toàn bộ orders của một user thông qua userId
-orderRouter.get('/list-orders-by-userid', async function (request, response) {
+
+
+
+// lấy toàn bộ orders của một user thông qua userId, order status
+orderRouter.post('/list-orders', async function (request, response) {
 
     try {
 
-        const { userId } = request.query
-        const orders = await orderModel.find({ userId: userId });
+        const { userId, status } = request.body
+        const orders = await orderModel.find({ userId: userId, status: status }).populate('userId');
+        const updateOrders = orders.map((order) => {
+            const orderObj = order.toObject();
+            orderObj.user = orderObj.userId;
+            delete orderObj.userId;
+            return orderObj;
+        });
+        console.log(updateOrders)
 
         const allOrders = await Promise.all(
-            orders.map(async (order) => {
-                const details = await orderDetailModel.find({ orderId: order._id })
+            updateOrders.map(async (order) => {
+                const details = await orderDetailModel.find({ orderId: order._id }).populate('productId')
+                const updateDetails = details.map((detail) => {
+                    const { productId, ...restDetail } = detail.toObject();
+                    return { ...restDetail, product: productId }; 
+                })
                 return {
                     order,
-                    details
+                    details: updateDetails
                 };
             })
         );
-        response.status(200).json({ status: true, message: "Get orders by userId completed", allOrders });
+        response.status(200).json({ status: true, message: "Get orders by userId completed", orders: allOrders });
 
 
     } catch (error) {
-        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message }` })
+        response.status(400).json({ status: false, message: `Http Exception 400: ${error.message}` })
     }
 
 })
