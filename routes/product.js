@@ -133,7 +133,9 @@ productRouter.get('/list/category/:categoryId', async function (request, respons
         // Lấy danh sách sản phẩm thuộc loại đó
         const list = await productModel.find({ categoryId });
 
-        response.status(200).json({ status: true, message: "Mission completed", products: list });
+        response.status(200).json(
+            { status: true, message: "Mission completed", products: list }
+        );
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Mission failed', products: [] });

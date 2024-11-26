@@ -114,7 +114,7 @@ userRouter.post('/register', async function (request, response) {
 userRouter.post('/login', async function (request, response) {
     try {
         const { email, password } = request.body
-        userExisted = await userModel.findOne({ email: email, password: password })
+        const userExisted = await userModel.findOne({ email: email, password: password })
         if (userExisted) {
 
             response.status(200).json({ status: true, message: "Login successfully", userDetail: userExisted });
