@@ -287,7 +287,7 @@ orderRouter.post('/list-orders', async function (request, response) {
                 };
             })
         );
-        response.status(200).json({ status: true, message: "Get orders by userId completed", orders: allOrders });
+        response.status(200).json({ status: true, message: "Get orders by userId and status completed", orders: allOrders });
 
 
     } catch (error) {
