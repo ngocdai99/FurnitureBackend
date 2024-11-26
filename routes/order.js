@@ -265,7 +265,7 @@ orderRouter.post('/list-orders', async function (request, response) {
     try {
 
         const { userId, status } = request.body
-        const orders = await orderModel.find({ userId: userId, status: status }).populate('userId').sort('createdAt', 'descending');
+        const orders = await orderModel.find({ userId: userId, status: status }).populate('userId').sort({'createdAt': 'descending'});
         const updateOrders = orders.map((order) => {
             const orderObj = order.toObject();
             orderObj.user = orderObj.userId;
