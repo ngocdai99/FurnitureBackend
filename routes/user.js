@@ -50,7 +50,7 @@ userRouter.post('/register', async function (request, response) {
 
 
         if (!userExisted) {
-            const user = { name, image: '', email, password, age: '', address: '' };
+            const user = { name, image: '', email, password, age: 18, address: '' };
             console.log('newUser', user)
             const newUser = await userModel.create(user);
             response.status(200).json({ status: true, message: "Register completed", userDetail: newUser });
