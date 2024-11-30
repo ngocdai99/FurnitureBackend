@@ -53,7 +53,7 @@ userRouter.post('/register', async function (request, response) {
             const user = { name, image: '', email, password, age: 18, address: '' };
             console.log('newUser', user)
             const newUser = await userModel.create(user);
-            response.status(200).json({ status: true, message: "Register completed", userDetail: newUser });
+            response.status(200).json({ status: true, message: "Register successfully", userDetail: newUser });
         } else {
             response.status(409).json({ status: false, message: "Email existed" });
         }
