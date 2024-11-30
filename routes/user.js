@@ -44,9 +44,13 @@ const fs = require('fs').promises
 userRouter.post('/register', async function (request, response) {
     try {
         const { name, email, password } = request.body
+
+        
         const userExisted = await userModel.findOne({ email: email })
+
+
         if (!userExisted) {
-            const user = { name, image: '', email, password, age: '', address: '', };
+            const user = { name, image: '', email, password, age: '', address: '' };
             console.log('newUser', user)
             const newUser = await userModel.create(user);
             response.status(200).json({ status: true, message: "Register completed", userDetail: newUser });

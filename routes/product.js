@@ -129,7 +129,7 @@ productRouter.get('/list/quantity', async function (request, response) {
 productRouter.get('/list/category/:categoryId', async function (request, response) {
     try {
 
-        const { categoryId } = request.params;
+        const {categoryId} = request.params
         // Lấy danh sách sản phẩm thuộc loại đó
         const list = await productModel.find({ categoryId });
 
@@ -141,6 +141,7 @@ productRouter.get('/list/category/:categoryId', async function (request, respons
         response.status(400).json({ status: false, message: 'Mission failed', products: [] });
     }
 });
+
 
 productRouter.get('/detail/:productId/:userId', async function (request, response) {
     try {
