@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser')
 var logger = require('morgan');
 const cors = require('cors');
-
+const axios = require('axios');
 
 
 // config mongoose
@@ -86,5 +86,20 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+function keepServerAlive() {
+  const url = 'https://restapirepo.onrender.com/api-docs/'; // URL chính của bạn sau khi deploy
+
+  setInterval(async () => {
+    try {
+      const res = await axios.get(url);
+      console.log('⏰ Keep alive ping at', new Date().toISOString());
+    } catch (err) {
+      console.error('❌ Keep alive failed:', err.message);
+    }
+  }, 600000); // 600_000 ms = 10 phút
+}
+
+keepServerAlive();
 
 module.exports = app
