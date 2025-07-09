@@ -89,47 +89,47 @@ userRouter.post('/register', async function (request, response) {
  *                 example: 123
  *     responses:
  *       200:
- *         description: Register successfully
+ *         description: Login successfully
  *       400: 
  *         description: Http Exception 400, Bad request, Login failed
  *       401: 
  *         description: Http Exception 409, Email doesn't existed or wrong password
  */
-// userRouter.post('/login', async function (request, response) {
-//     try {
-//         const { email, password } = request.body
-//         userExisted = await userModel.findOne({ email: email, password: password })
-//         if (userExisted) {
-
-//             const token = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' });
-//             const refreshToken = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' })
-
-
-//             response.status(200).json({ status: true, message: "Login successfully", token, refreshToken });
-//         } else {
-//             response.status(401).json({ status: true, message: "Email doesn't existed or wrong password" });
-//         }
-
-//     } catch (error) {
-//         response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Login failed' })
-//     }
-// })
-
 userRouter.post('/login', async function (request, response) {
     try {
         const { email, password } = request.body
-        const userExisted = await userModel.findOne({ email: email, password: password })
+        userExisted = await userModel.findOne({ email: email, password: password })
         if (userExisted) {
 
-            response.status(200).json({ status: true, message: "Login successfully", userDetail: userExisted });
+            const token = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' });
+            const refreshToken = JWT.sign({ id: email }, config.SECRETKEY, { expiresIn: '1h' })
+
+
+            response.status(200).json({ status: true, message: "Login successfully", token, refreshToken });
         } else {
-            response.status(401).json({ status: false, message: "Email doesn't existed or wrong password" });
+            response.status(401).json({ status: true, message: "Email doesn't existed or wrong password" });
         }
 
     } catch (error) {
         response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Login failed' })
     }
 })
+
+// userRouter.post('/login', async function (request, response) {
+//     try {
+//         const { email, password } = request.body
+//         const userExisted = await userModel.findOne({ email: email, password: password })
+//         if (userExisted) {
+
+//             response.status(200).json({ status: true, message: "Login successfully", userDetail: userExisted });
+//         } else {
+//             response.status(401).json({ status: false, message: "Email doesn't existed or wrong password" });
+//         }
+
+//     } catch (error) {
+//         response.status(400).json({ status: false, message: 'Http Exception 400: Bad request, Login failed' })
+//     }
+// })
 
 
 
