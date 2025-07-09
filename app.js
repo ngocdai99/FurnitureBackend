@@ -97,7 +97,7 @@ function keepServerAlive() {
     } catch (err) {
       console.error('❌ Keep alive failed:', err.message);
     }
-  }, 600000); // 600_000 ms = 10 phút
+  }, 13 * 60 * 1000); // 600_000 ms = 10 phút
 }
 
 keepServerAlive();
